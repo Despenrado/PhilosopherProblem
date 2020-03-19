@@ -28,19 +28,11 @@ void keyboardFunc()
     *isRunning = false;
 }
 
-// static void test()
-// {
-//     for (int i = 0; i < 10000; i++)
-//     {
-//         cout << this_thread::get_id() << endl;
-//     }
-// }
-
 int main(int argc, char **argv)
 {
     system("export TERM=xterm-256color");
     srand(time(NULL));
-    int philosopherNumber = 6;
+    int philosopherNumber = 5;
     if (argc > 1)
     {
         string tmp = argv[1];
@@ -56,20 +48,16 @@ int main(int argc, char **argv)
     for (int i = 0; i < philosopherNumber; i++)
     {
         mtx.lock();
-        cout << "start1-" << i << endl;
         philosophers.push_back(new Philosopher(i));
-        cout << "start2-" << i << endl;
-        //this_thread::sleep_for(chrono::milliseconds(1000));
-        cout << "start3-" << i << endl;
         threads.push_back(new thread([&philosophers, i]() {
-            cout << "start4-" << i << endl;
+            cout << "Philosopher number: " << i << " thread: " << this_thread::get_id() << " was started...";
             philosophers.at(i)->run();
         }));
-        cout << "start5-" << i << endl;
         mtx.unlock();
     }
-    this_thread::sleep_for(chrono::milliseconds(1000));
+    this_thread::sleep_for(chrono::milliseconds(500));
     cout << "done" << endl;
+    this_thread::sleep_for(chrono::milliseconds(500));
     int row, col;
     initscr();
     noecho();
@@ -87,22 +75,29 @@ int main(int argc, char **argv)
     vector<string> phProgress;
     vector<string> forkIsBusy;
     vector<string> phFood;
-    int vOffset = 5;
-    int hOffset = 3;
+    vector<string> phNumberFork;
+    vector<string> forkDirt;
+    int hOffset = 5;
+    int vOffset = 3;
     int fps = 0;
+
     do
     {
         getmaxyx(stdscr, row, col);
         for (int i = 0; i < philosopherNumber; i++)
         {
+
             philosophers.at(i)->mtx.lock();
             phNumber.push_back(to_string(philosophers.at(i)->number));
             phState.push_back(philosophers.at(i)->state);
             phProgress.push_back(to_string(philosophers.at(i)->progress) + "%");
             phFood.push_back(to_string(philosophers.at(i)->food));
             philosophers.at(i)->mtx.unlock();
+
             ForkManager::forkList.at(i)->mtx.lock();
             forkIsBusy.push_back((ForkManager::forkList.at(i)->isBusy) ? "true" : "false");
+            phNumberFork.push_back(to_string(ForkManager::forkList.at(i)->nrPhilosopher));
+            forkDirt.push_back(to_string(ForkManager::forkList.at(i)->dirt));
             ForkManager::forkList.at(i)->mtx.unlock();
         }
         if (fps >= INT32_MAX)
@@ -113,58 +108,66 @@ int main(int argc, char **argv)
         clear();
 
         attron(COLOR_PAIR(1));
-        for (int i = hOffset; i < row - hOffset; i++)
+        for (int i = vOffset; i < row - vOffset; i++)
         {
             mvhline(i, 5, ' ', col - 10);
         }
 
-        mvwaddstr(stdscr, 3, (col - help1.length()) / 2, help1.c_str());
-        mvwaddstr(stdscr, 4, (col - help2.length()) / 2, help2.c_str());
-        mvwaddstr(stdscr, 6, vOffset + 1, "Philosopher");
-        mvwaddstr(stdscr, 6, vOffset + 15, "State");
-        mvwaddstr(stdscr, 6, vOffset + 35, "Progress");
-        mvwaddstr(stdscr, 6, vOffset + 45, "Food");
+        mvhline(10 + philosopherNumber, hOffset + 1, '-', col - vOffset - 9);
+        if (fps % 40 > 10)
+        {
+            mvwaddstr(stdscr, 3, (col - help1.length()) / 2, help1.c_str());
+            mvwaddstr(stdscr, 4, (col - help2.length()) / 2, help2.c_str());
+        }
+        mvwaddstr(stdscr, 6, hOffset + 2, "Philosopher");
+        mvwaddstr(stdscr, 6, hOffset + 15, "State");
+        mvwaddstr(stdscr, 6, hOffset + 35, "Progress");
+        mvwaddstr(stdscr, 6, hOffset + 45, "Eaten food");
         for (int i = 0; i <= (philosopherNumber - 1) / 5; i++)
         {
-            mvwaddstr(stdscr, 9 + philosopherNumber + i * 2, vOffset + 1, "Fork number");
-            mvwaddstr(stdscr, 10 + philosopherNumber + i * 2, vOffset + 1, "is busy");
+            mvwaddstr(stdscr, 11 + philosopherNumber + i * 5, hOffset + 2, "Fork number:");
+            mvwaddstr(stdscr, 12 + philosopherNumber + i * 5, hOffset + 2, "is free:");
+            mvwaddstr(stdscr, 13 + philosopherNumber + i * 5, hOffset + 2, "philosopher:");
+            mvwaddstr(stdscr, 14 + philosopherNumber + i * 5, hOffset + 2, "dirt:");
         }
         mvwaddstr(stdscr, row - 4, col - 15, to_string(fps).c_str());
-
         for (int i = 0; i < philosopherNumber; i++)
         {
             attron(COLOR_PAIR(1));
-            mvwaddstr(stdscr, 8 + i, vOffset + 3, phNumber.at(i).c_str());
-            mvwaddstr(stdscr, 8 + i, vOffset + 15, phState.at(i).c_str());
-            mvwaddstr(stdscr, 8 + i, vOffset + 38, phProgress.at(i).c_str());
-            mvwaddstr(stdscr, 8 + i, vOffset + 45, phFood.at(i).c_str());
+            mvwaddstr(stdscr, 8 + i, hOffset + 4, phNumber.at(i).c_str());
+            mvwaddstr(stdscr, 8 + i, hOffset + 15, phState.at(i).c_str());
+            mvwaddstr(stdscr, 8 + i, hOffset + 38, phProgress.at(i).c_str());
+            mvwaddstr(stdscr, 8 + i, hOffset + 50, phFood.at(i).c_str());
+            mvwaddstr(stdscr, 11 + philosopherNumber + (i / 5) * 5, hOffset + 15 + i % 5 * 7, to_string(i).c_str());
+            mvwaddstr(stdscr, 14 + philosopherNumber + (i / 5) * 5, hOffset + 15 + i % 5 * 7, forkDirt.at(i).c_str());
             if (!strcmp(forkIsBusy.at(i).c_str(), "false"))
-            {
-                attron(COLOR_PAIR(2));
-            }
-            else
             {
                 attron(COLOR_PAIR(3));
             }
-            mvwaddstr(stdscr, 9 + philosopherNumber + (i / 5) * 2, vOffset + 15 + i % 5 * 7, to_string(i).c_str());
-            mvwaddstr(stdscr, 10 + philosopherNumber + (i / 5) * 2, vOffset + 15 + i % 5 * 7, forkIsBusy[i].c_str());
+            else
+            {
+                attron(COLOR_PAIR(2));
+            }
+            mvwaddstr(stdscr, 12 + philosopherNumber + (i / 5) * 5, hOffset + 15 + i % 5 * 7, forkIsBusy[i].c_str());
+            mvwaddstr(stdscr, 13 + philosopherNumber + (i / 5) * 5, hOffset + 15 + i % 5 * 7, phNumberFork[i].c_str());
         }
+
         attron(COLOR_PAIR(4));
-        for (int i = 0; i < hOffset; i++)
-        {
-            mvhline(i, 0, ' ', col);
-        }
-        for (int i = row - hOffset; i < row; i++)
-        {
-            mvhline(i, 0, ' ', col);
-        }
         for (int i = 0; i < vOffset; i++)
         {
-            mvvline(hOffset, i, ' ', row - hOffset);
+            mvhline(i, 0, ' ', col);
         }
-        for (int i = col - vOffset; i < col; i++)
+        for (int i = row - vOffset; i < row; i++)
         {
-            mvvline(hOffset, i, ' ', row - hOffset);
+            mvhline(i, 0, ' ', col);
+        }
+        for (int i = 0; i < hOffset; i++)
+        {
+            mvvline(vOffset, i, ' ', row - hOffset);
+        }
+        for (int i = col - hOffset; i < col; i++)
+        {
+            mvvline(vOffset, i, ' ', row - hOffset);
         }
         refresh();
         this_thread::sleep_for(chrono::milliseconds(50));
@@ -173,6 +176,8 @@ int main(int argc, char **argv)
         phProgress.clear();
         forkIsBusy.clear();
         phFood.clear();
+        phNumberFork.clear();
+        forkDirt.clear();
     } while (*isRunning);
 
     //keyboardThread.~thread();
@@ -189,11 +194,19 @@ int main(int argc, char **argv)
         }
     }
     cout << "waiting for threads:" << endl;
+    vector<thread *> joinPhilosophers;
     for (int i = 0; i < philosopherNumber; i++)
     {
-        cout << "waiting for " << threads.at(i)->get_id() << "... ";
-        threads.at(i)->join();
-        cout << "successful" << endl;
+        joinPhilosophers.push_back(new thread([&threads, i]() {
+            cout << "waiting for " << threads.at(i)->get_id() << "(" << i << ")"
+                 << "... ";
+            threads.at(i)->join();
+            cout << i << " successful" << endl;
+        }));
+    }
+    for (int i = 0; i < philosopherNumber; i++)
+    {
+        joinPhilosophers.at(i)->join();
     }
     cout << "removing objects" << endl;
     for (int i = 0; i < philosopherNumber; i++)

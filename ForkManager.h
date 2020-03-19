@@ -16,8 +16,8 @@ public:
 
     static bool canEat(int);
     static void genForklist(int);
-    static void getFork(int, Fork *, Fork *);
-    static void releaseFork(int, Fork *, Fork *);
+    static void getFork(int, Fork *&, Fork *&);
+    static void releaseFork(int, Fork *&, Fork *&);
     static int checkForks();
     static void workSimulation(int);
 };

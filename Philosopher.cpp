@@ -16,7 +16,6 @@ void Philosopher::run()
 {
     while (*ForkManager::isRunning)
     {
-        //cout << "ph n =" << number << endl;
         think();
         if (!*ForkManager::isRunning)
         {
@@ -39,7 +38,7 @@ void Philosopher::run()
 void Philosopher::think()
 {
     mtx.lock();
-    state = "tkinking";
+    state = "thinking";
     mtx.unlock();
     workSimulation(rand() % 10 + 15);
 }
@@ -63,6 +62,12 @@ void Philosopher::eat()
     mtx.lock();
     state = "eating";
     mtx.unlock();
+    leftFork->mtx.lock();
+    leftFork->dirt += rand() % 10;
+    leftFork->mtx.unlock();
+    rightFork->mtx.lock();
+    rightFork->dirt += rand() % 10;
+    rightFork->mtx.unlock();
     workSimulation(rand() % 10 + 15);
     mtx.lock();
     if (food >= INT32_MAX)

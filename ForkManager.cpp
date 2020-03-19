@@ -13,6 +13,14 @@ bool ForkManager::canEat(int lFork)
     }
     forkList.at(lFork)->mtx.lock();
     forkList.at(rFork)->mtx.lock();
+    if (forkList.at(lFork)->dirt >= 100000)
+    {
+        forkList.at(lFork)->dirt = 0;
+    }
+    if (forkList.at(rFork)->dirt >= 100000)
+    {
+        forkList.at(rFork)->dirt = 0;
+    }
     if (!forkList.at(lFork)->isBusy && !forkList.at(rFork)->isBusy)
     {
         forkList.at(lFork)->isBusy = true;
@@ -41,7 +49,7 @@ void ForkManager::genForklist(int n)
     }
 }
 
-void ForkManager::getFork(int lFork, Fork *leftFork, Fork *rightFork)
+void ForkManager::getFork(int lFork, Fork *&leftFork, Fork *&rightFork)
 {
     int rFork = lFork + 1;
     if (lFork >= number - 1)
@@ -63,7 +71,7 @@ void ForkManager::getFork(int lFork, Fork *leftFork, Fork *rightFork)
     return;
 }
 
-void ForkManager::releaseFork(int lFork, Fork *leftFork, Fork *rightFork)
+void ForkManager::releaseFork(int lFork, Fork *&leftFork, Fork *&rightFork)
 {
     int rFork = lFork + 1;
     if (lFork >= number - 1)
