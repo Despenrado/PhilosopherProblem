@@ -13,7 +13,7 @@ bool killTreads = false;
 volatile int ForkManager::number = 0;
 mutex ForkManager::mtx;
 volatile bool *ForkManager::isRunning = isRunning;
-volatile bool ForkManager::managerOff = false;
+volatile int ForkManager::managerOff = 0;
 vector<Fork *> ForkManager::forkList = vector<Fork *>();
 void keyboardFunc()
 {
@@ -33,36 +33,25 @@ void keyboardFunc()
 int main(int argc, char **argv)
 {
     int philosopherNumber = 5;
-    string consoleHelp = "";
-    if (argc > 1)
-    {
-        philosopherNumber = atoi(argv[1]); // ta linijka kodu czasem wywala "segmentation fault", kiedy wykorzystać "atoi(argv[1])", błęd pojawia się częściej
-        if (philosopherNumber == 0)
-        {
-            cout << "Bład parametrów. 1-y parametr nie jest liczbą" << endl;
-            cout << consoleHelp << endl;
-            return 0;
-        }
-    }
+    string consoleHelp = "Skladnia urochominia programu:\nNazwa [tup rozwiązania] [liczba filozofow]\n typy rozwiązania:\n1 - za pomocą kelnera\n2 - prosta realizacja z hierarchia zasobow\n3 - hierarchia zasobów z wyzwalieneim zasobo przez jakis czs";
     if (argc > 2)
     {
-        int tmp = atoi(argv[2]); // ta linijka kodu czasem wywala "segmentation fault", kiedy wykorzystać "atoi(argv[1])", błęd pojawia się częściej
-        if (tmp == 0)
+        philosopherNumber = atoi(argv[2]); // ta linijka kodu czasem wywala "segmentation fault", kiedy wykorzystać "atoi(argv[1])", błęd pojawia się częściej
+        if (philosopherNumber == 0)
         {
             cout << "Bład parametrów. 2-i parametr nie jest liczbą" << endl;
             cout << consoleHelp << endl;
             return 0;
         }
-        else
+    }
+    if (argc > 1)
+    {
+        ForkManager::managerOff = atoi(argv[1]); // ta linijka kodu czasem wywala "segmentation fault", kiedy wykorzystać "atoi(argv[1])", błęd pojawia się częściej
+        if (ForkManager::managerOff == 0)
         {
-            if (tmp == 1)
-            {
-                ForkManager::managerOff = true;
-            }
-            else
-            {
-                ForkManager::managerOff = false;
-            }
+            cout << "Bład parametrów. 1-y parametr nie jest liczbą" << endl;
+            cout << consoleHelp << endl;
+            return 0;
         }
     }
     system("export TERM=xterm-256color");

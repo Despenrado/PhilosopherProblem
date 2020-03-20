@@ -10,7 +10,7 @@ public:
     static volatile int number;
     static vector<Fork *> forkList;
     static volatile bool *isRunning;
-    static volatile bool managerOff;
+    static volatile int managerOff;
     static mutex mtx;
 
     ForkManager();
@@ -19,6 +19,7 @@ public:
     static void genForklist(int);
     static void getFork(int, Fork *&, Fork *&);
     static void getFork(int, Fork *&, int);
+    static void getFork2(int, Fork *&, int);
     static int getForkNumber(int);
     static void releaseFork(int, Fork *&, Fork *&);
     static void releaseFork(Fork *&);

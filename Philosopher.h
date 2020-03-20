@@ -22,6 +22,7 @@ public:
     void think();
     void takeFork();
     void takeForks();
+    void takeForks2();
     void releaseFork();
     void releaseForks();
     void workSimulation(int);
