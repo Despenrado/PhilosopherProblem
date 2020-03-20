@@ -15,6 +15,7 @@ mutex ForkManager::mtx;
 volatile bool *ForkManager::isRunning = isRunning;
 volatile int ForkManager::managerOff = 0;
 vector<Fork *> ForkManager::forkList = vector<Fork *>();
+
 void keyboardFunc()
 {
     int key = 0;
@@ -33,7 +34,7 @@ void keyboardFunc()
 int main(int argc, char **argv)
 {
     int philosopherNumber = 5;
-    string consoleHelp = "Skladnia urochominia programu:\nNazwa [tup rozwiązania] [liczba filozofow]\n typy rozwiązania:\n1 - za pomocą kelnera\n2 - prosta realizacja z hierarchia zasobow\n3 - hierarchia zasobów z wyzwalieneim zasobo przez jakis czs";
+    string consoleHelp = "\n\nSkladnia urochomienia programu:\nNazwa [tup rozwiązania] [liczba filozofow]\ntypy rozwiązania:\n1 - za pomocą kelnera\n2 - prosta realizacja z hierarchia zasobow\n3 - hierarchia zasobów z wyzwalieneim zasobo przez jakis czs";
     if (argc > 2)
     {
         philosopherNumber = atoi(argv[2]); // ta linijka kodu czasem wywala "segmentation fault", kiedy wykorzystać "atoi(argv[1])", błęd pojawia się częściej
@@ -233,5 +234,6 @@ int main(int argc, char **argv)
     }
     delete isRunning;
     cout << "close" << endl;
+    cout << consoleHelp << endl;
     return 0;
 }

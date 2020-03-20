@@ -86,7 +86,7 @@ void ForkManager::getFork(int nFork, Fork *&fork, int phNumber)
 
 void ForkManager::getFork2(int nFork, Fork *&fork, int phNumber)
 {
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 200; i++)
     {
         if (!forkList.at(nFork)->isBusy)
         {
@@ -95,7 +95,7 @@ void ForkManager::getFork2(int nFork, Fork *&fork, int phNumber)
         else
         {
             this_thread::sleep_for(chrono::milliseconds(10));
-            if (i == 4)
+            if (i == 199)
             {
                 fork = NULL;
                 return;
