@@ -71,6 +71,19 @@ void ForkManager::getFork(int lFork, Fork *&leftFork, Fork *&rightFork)
     return;
 }
 
+void ForkManager::getFork(int nFork, Fork *&fork, int phNumber)
+{
+    forkList.at(nFork)->cv.wait(*(forkList.at(nFork)->ulm), [&nFork]() {
+        return !forkList.at(nFork)->isBusy;
+    });
+    forkList.at(nFork)->mtx.lock();
+    forkList.at(nFork)->nrPhilosopher = phNumber;
+    forkList.at(nFork)->isBusy = true;
+    fork = forkList.at(nFork);
+    forkList.at(nFork)->mtx.unlock();
+    return;
+}
+
 void ForkManager::releaseFork(int lFork, Fork *&leftFork, Fork *&rightFork)
 {
     int rFork = lFork + 1;
@@ -96,6 +109,22 @@ void ForkManager::releaseFork(int lFork, Fork *&leftFork, Fork *&rightFork)
     forkList.at(rFork)->mtx.unlock();
     return;
 }
+
+void ForkManager::releaseFork(Fork *&leftFork)
+{
+    if (leftFork == NULL)
+    {
+        return;
+    }
+    leftFork->mtx.lock();
+    leftFork->isBusy = false;
+    leftFork->nrPhilosopher = -1;
+    leftFork->mtx.unlock();
+    leftFork->cv.notify_one();
+    leftFork = NULL;
+    return;
+}
+
 int ForkManager::checkForks()
 {
     int n = 0;

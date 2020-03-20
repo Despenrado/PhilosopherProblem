@@ -2,6 +2,7 @@
 #include "stddef.h"
 #include "ncurses.h"
 #include <cstring>
+#include <string>
 #include "Philosopher.h"
 
 using namespace std;
@@ -12,6 +13,7 @@ bool killTreads = false;
 volatile int ForkManager::number = 0;
 mutex ForkManager::mtx;
 volatile bool *ForkManager::isRunning = isRunning;
+volatile bool ForkManager::managerOff = false;
 vector<Fork *> ForkManager::forkList = vector<Fork *>();
 void keyboardFunc()
 {
@@ -30,16 +32,41 @@ void keyboardFunc()
 
 int main(int argc, char **argv)
 {
-    system("export TERM=xterm-256color");
-    srand(time(NULL));
     int philosopherNumber = 5;
+    string consoleHelp = "";
     if (argc > 1)
     {
-        string tmp = argv[1];
-        philosopherNumber = stoi(tmp); // ta linijka kodu czasem wywala "segmentation fault", kiedy wykorzystać "atoi(argv[1])", błęd pojawia się częściej
-        cout << "this error ,perhaps, because of \"stoi()\" function" << endl;
-        cout << "ten błąd z powowdu funkcji \"stoi()\"" << endl;
+        philosopherNumber = atoi(argv[1]); // ta linijka kodu czasem wywala "segmentation fault", kiedy wykorzystać "atoi(argv[1])", błęd pojawia się częściej
+        if (philosopherNumber == 0)
+        {
+            cout << "Bład parametrów. 1-y parametr nie jest liczbą" << endl;
+            cout << consoleHelp << endl;
+            return 0;
+        }
     }
+    if (argc > 2)
+    {
+        int tmp = atoi(argv[2]); // ta linijka kodu czasem wywala "segmentation fault", kiedy wykorzystać "atoi(argv[1])", błęd pojawia się częściej
+        if (tmp == 0)
+        {
+            cout << "Bład parametrów. 2-i parametr nie jest liczbą" << endl;
+            cout << consoleHelp << endl;
+            return 0;
+        }
+        else
+        {
+            if (tmp == 1)
+            {
+                ForkManager::managerOff = true;
+            }
+            else
+            {
+                ForkManager::managerOff = false;
+            }
+        }
+    }
+    system("export TERM=xterm-256color");
+    srand(time(NULL));
     ForkManager::genForklist(philosopherNumber);
     ForkManager::isRunning = isRunning;
     vector<Philosopher *> philosophers;
@@ -95,7 +122,7 @@ int main(int argc, char **argv)
             philosophers.at(i)->mtx.unlock();
 
             ForkManager::forkList.at(i)->mtx.lock();
-            forkIsBusy.push_back((ForkManager::forkList.at(i)->isBusy) ? "true" : "false");
+            forkIsBusy.push_back((!ForkManager::forkList.at(i)->isBusy) ? "true" : "false");
             phNumberFork.push_back(to_string(ForkManager::forkList.at(i)->nrPhilosopher));
             forkDirt.push_back(to_string(ForkManager::forkList.at(i)->dirt));
             ForkManager::forkList.at(i)->mtx.unlock();

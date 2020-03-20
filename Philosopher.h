@@ -21,6 +21,8 @@ public:
     void eat();
     void think();
     void takeFork();
+    void takeForks();
     void releaseFork();
+    void releaseForks();
     void workSimulation(int);
 };
