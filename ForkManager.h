@@ -20,6 +20,7 @@ public:
     static void getFork(int, Fork *&, Fork *&);
     static void getFork(int, Fork *&, int);
     static void getFork2(int, Fork *&, int);
+    static void getFork3(int, Fork *&, int);
     static int getForkNumber(int);
     static void releaseFork(int, Fork *&, Fork *&);
     static void releaseFork(Fork *&);

@@ -86,6 +86,29 @@ void Philosopher::run()
         }
         break;
     }
+    case 4:
+    {
+        while (*ForkManager::isRunning)
+        {
+            think();
+            if (!*ForkManager::isRunning)
+            {
+                break;
+            }
+            takeForks3();
+            if (!*ForkManager::isRunning)
+            {
+                break;
+            }
+            eat();
+            if (!*ForkManager::isRunning)
+            {
+                break;
+            }
+            releaseForks();
+        }
+        break;
+    }
     default:
         break;
     }
@@ -155,6 +178,49 @@ void Philosopher::takeForks()
         state = "waiting left Fork";
         mtx.unlock();
         ForkManager::getFork(number, leftFork, number);
+    }
+}
+
+void Philosopher::takeForks3()
+{
+    if (number < ForkManager::number - 1)
+    {
+
+        mtx.lock();
+        state = "taking left Fork";
+        mtx.unlock();
+        workSimulation(rand() % 15 + 20);
+        mtx.lock();
+        state = "waiting left Fork";
+        mtx.unlock();
+        ForkManager::getFork3(number, leftFork, number);
+        mtx.lock();
+        state = "taking right Fork";
+        mtx.unlock();
+        workSimulation(rand() % 15 + 20);
+        mtx.lock();
+        state = "waiting right Fork";
+        mtx.unlock();
+        ForkManager::getFork3(number + 1, rightFork, number);
+    }
+    else
+    {
+        mtx.lock();
+        state = "taking right Fork";
+        mtx.unlock();
+        workSimulation(rand() % 15 + 20);
+        mtx.lock();
+        state = "waiting right Fork";
+        mtx.unlock();
+        ForkManager::getFork3(0, rightFork, number);
+        mtx.lock();
+        state = "taking left Fork";
+        mtx.unlock();
+        workSimulation(rand() % 15 + 20);
+        mtx.lock();
+        state = "waiting left Fork";
+        mtx.unlock();
+        ForkManager::getFork3(number, leftFork, number);
     }
 }
 
@@ -278,7 +344,7 @@ void Philosopher::releaseForks()
         mtx.lock();
         state = "release left Fork";
         mtx.unlock();
-        workSimulation(rand() % 15 + 20);
+        //workSimulation(rand() % 15 + 20);
         ForkManager::releaseFork(leftFork);
     }
     else
@@ -291,7 +357,7 @@ void Philosopher::releaseForks()
         mtx.lock();
         state = "release right Fork";
         mtx.unlock();
-        workSimulation(rand() % 15 + 20);
+        //workSimulation(rand() % 15 + 20);
         ForkManager::releaseFork(rightFork);
     }
 }
@@ -300,11 +366,11 @@ void Philosopher::workSimulation(int times)
 {
     for (int i = 0; i < times; i++)
     {
-        this_thread::sleep_for(chrono::milliseconds(50));
+        this_thread::sleep_for(chrono::milliseconds(5));
         this->mtx.lock();
         progress = float(i * 100) / times;
         this->mtx.unlock();
-        this_thread::sleep_for(chrono::milliseconds(50));
+        this_thread::sleep_for(chrono::milliseconds(5));
     }
     this->mtx.lock();
     progress = 0;

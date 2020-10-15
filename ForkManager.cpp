@@ -110,6 +110,20 @@ void ForkManager::getFork2(int nFork, Fork *&fork, int phNumber)
     return;
 }
 
+void ForkManager::getFork3(int nFork, Fork *&fork, int phNumber)
+{
+    while (forkList.at(nFork)->isBusy)
+    {
+        /* code */
+    }
+    forkList.at(nFork)->mtx.lock();
+    forkList.at(nFork)->nrPhilosopher = phNumber;
+    forkList.at(nFork)->isBusy = true;
+    fork = forkList.at(nFork);
+    forkList.at(nFork)->mtx.unlock();
+    return;
+}
+
 void ForkManager::releaseFork(int lFork, Fork *&leftFork, Fork *&rightFork)
 {
     int rFork = lFork + 1;

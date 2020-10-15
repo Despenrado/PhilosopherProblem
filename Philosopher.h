@@ -23,6 +23,7 @@ public:
     void takeFork();
     void takeForks();
     void takeForks2();
+    void takeForks3();
     void releaseFork();
     void releaseForks();
     void workSimulation(int);
